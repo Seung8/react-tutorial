@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 function User({ user, onRemove, onToggle }) {
     const { id, username, email, active } = user;
+
+    useEffect(() => {
+        console.log('컴포넌트 렌더링');
+    }, []
+    );
+
     return (
         <div>
             <b
