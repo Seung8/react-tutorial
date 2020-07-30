@@ -1,9 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import './App.css';
 import Counter from './Counter';
 import InputSample from './inputSample';
 import UserList from './UserList';
 import CreateUser from './CreateUser';
+
+function countActiveUsers(users) {
+  console.log('Active 사용자 연산 실행');
+  return users.filter(user => user.active).length;
+}
 
 function App() {
   const [inputs, setInputs] = useState({
@@ -35,6 +40,15 @@ function App() {
     }
   ]);
 
+  // const onChange = useCallback(e => {
+  //   const { name, value } = e.target;
+  //   setInputs({
+  //     ...inputs,
+  //     [name]: value
+  //   });
+  // }, [inputs]);
+
+  // useCallback 훅을 이용하여 onChange 함수를 미리 정의 후 재사용
   const onChange = e => {
     const { name, value } = e.target;
     setInputs({
@@ -43,43 +57,62 @@ function App() {
     });
   };
 
-  const onCreate = () => {
+  // const onCreate = e => {
+  //   const user = {
+  //     id: nextId.current,
+  //     username,
+  //     email
+  //   };
+  //   setUsers(users.concat(user));
+  //   setInputs({
+  //     username: '',
+  //     email: ''
+  //   });
+  //   nextId.current += 1;
+  // };
+
+  // usecallback 훅을 이용하여 onCreate 함수를 미리 정의 후 재사용
+  const onCreate = useCallback(e => {
     const user = {
       id: nextId.current,
       username,
       email
     };
-    // useState를 이용한 기존 배열(...users)에 새 user 객체 추가
-    // setUsers({
-    //   ...inputs,
-    //   username, 
-    //   email
-    // });
-
-    // concat()을 이용한 새 user 추가(권장)
     setUsers(users.concat(user));
-    // Input 값(username, email) 비우기
     setInputs({
       username: '',
       email: '',
     });
-    console.log(nextId.current);  // useRef의 기본값인 4가 출력
-    nextId.current += 1  // onCreate 함수 호출 시 nextId를 사용하고 이후에는 +1
-  };
+    nextId.current += 1;
+  }, [username, email, users]);
 
-  const onRemove = id => {
-    // users 목록에서 user 들을 순회하며 user.id가 전달받은 id와 일치하지 않는 객체만 찾아서
-    // filter()를 통해 새로운 배열로 리턴
+  // const onRemove = id => {
+  //   setUsers(users.filter(user => user.id !== id));
+  // };
+
+  // useCallback 훅을 이용하여 onRemove 함수를 미리 정의 후 재사용
+  const onRemove = useCallback(id => {
     setUsers(users.filter(user => user.id !== id));
-  };
+  }, [users]);
 
-  const onToggle = id => {
+  // const onToggle = id => {
+  //   setUsers(users.map(
+  //     user => user.id === id
+  //     ? { ...user, active: !user.active }
+  //     : user
+  //   ));
+  // };
+
+  // useCallback 훅을 이용하여 onToggle 함수를 미리 정의 후 재사용
+  const onToggle = useCallback(id => {
     setUsers(users.map(
       user => user.id === id
         ? { ...user, active: !user.active }
         : user
     ));
-  }
+  }, [users]);
+
+  const count = useMemo(() => countActiveUsers(users), [users]);
 
   return (
     <>
@@ -93,6 +126,8 @@ function App() {
           onRemove={onRemove}
           onToggle={onToggle}
         />
+        <br />
+        <div>활성 사용자 수: {count}</div>
         <br />
         <b>계정 생성</b>
         <CreateUser
