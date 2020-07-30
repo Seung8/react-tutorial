@@ -50,4 +50,4 @@ function InputSample() {
     );
 }
 
-export default InputSample;
+export default React.memo(InputSample);

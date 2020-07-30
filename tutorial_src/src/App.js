@@ -40,22 +40,22 @@ function App() {
     }
   ]);
 
-  // const onChange = useCallback(e => {
+  // const onChange = e => {
   //   const { name, value } = e.target;
   //   setInputs({
   //     ...inputs,
   //     [name]: value
   //   });
-  // }, [inputs]);
+  // };
 
   // useCallback 훅을 이용하여 onChange 함수를 미리 정의 후 재사용
-  const onChange = e => {
+  const onChange = useCallback(e => {
     const { name, value } = e.target;
     setInputs({
       ...inputs,
       [name]: value
     });
-  };
+  }, [inputs]);
 
   // const onCreate = e => {
   //   const user = {
@@ -72,19 +72,21 @@ function App() {
   // };
 
   // usecallback 훅을 이용하여 onCreate 함수를 미리 정의 후 재사용
-  const onCreate = useCallback(e => {
+  const onCreate = useCallback(() => {
     const user = {
       id: nextId.current,
       username,
       email
     };
-    setUsers(users.concat(user));
+
+    // useState() 훅의 함수형 업데이트
+    setUsers(users => users.concat(user));
     setInputs({
       username: '',
       email: '',
     });
     nextId.current += 1;
-  }, [username, email, users]);
+  }, [username, email]);
 
   // const onRemove = id => {
   //   setUsers(users.filter(user => user.id !== id));
@@ -92,8 +94,8 @@ function App() {
 
   // useCallback 훅을 이용하여 onRemove 함수를 미리 정의 후 재사용
   const onRemove = useCallback(id => {
-    setUsers(users.filter(user => user.id !== id));
-  }, [users]);
+    setUsers(users => users.filter(user => user.id !== id));
+  }, []);
 
   // const onToggle = id => {
   //   setUsers(users.map(
@@ -105,38 +107,37 @@ function App() {
 
   // useCallback 훅을 이용하여 onToggle 함수를 미리 정의 후 재사용
   const onToggle = useCallback(id => {
-    setUsers(users.map(
+    setUsers(users => users.map(
       user => user.id === id
         ? { ...user, active: !user.active }
         : user
     ));
-  }, [users]);
+  }, []);
 
-  const count = useMemo(() => countActiveUsers(users), [users]);
+  const count = useMemo(
+    () => countActiveUsers(users), [users]
+  );
 
   return (
     <>
       <Counter />
       <InputSample />
       <br />
-      <>
-        <b>계정 목록</b>
-        <UserList
-          users={users}
-          onRemove={onRemove}
-          onToggle={onToggle}
-        />
-        <br />
-        <div>활성 사용자 수: {count}</div>
-        <br />
-        <b>계정 생성</b>
-        <CreateUser
-          username={username}
-          email={email}
-          onChange={onChange}
-          onCreate={onCreate}
-        />
-      </>
+      <UserList
+        users={users}
+        onRemove={onRemove}
+        onToggle={onToggle}
+      />
+      <br />
+      <div>활성 사용자 수: {count}</div>
+      <br />
+      <b>계정 생성</b>
+      <CreateUser
+        username={username}
+        email={email}
+        onChange={onChange}
+        onCreate={onCreate}
+      />
     </>
   );
 }
